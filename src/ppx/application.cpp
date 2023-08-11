@@ -417,6 +417,21 @@ Result Application::InitializeGrfxSurface()
 
 Result Application::CreateSwapchains()
 {
+    // Foveation
+    grfx::FoveationPatternPtr foveationPattern = nullptr;
+    if (mSettings.grfx.foveationMode != grfx::FOVEATION_NONE) {
+        grfx::FoveationPatternCreateInfo foveationInfo = {};
+        foveationInfo.fbWidth                          = mSettings.window.width;
+        foveationInfo.fbHeight                         = mSettings.window.height;
+        foveationInfo.foveationMode                    = mSettings.grfx.foveationMode;
+        Result ppxres                                  = GetDevice()->CreateFoveationPattern(&foveationInfo, &foveationPattern);
+        if (Failed(ppxres)) {
+            PPX_ASSERT_MSG(false, "[zzong] FoveationPattern create failed");
+            return ppxres;
+        }
+        PPX_LOG_INFO("[zzong] Foveation pattern created for swapchain");
+    }
+
 #if defined(PPX_BUILD_XR)
     if (mSettings.xr.enable) {
         const size_t viewCount = mXrComponent.GetViewCount();
@@ -425,6 +440,7 @@ Result Application::CreateSwapchains()
         grfx::SwapchainCreateInfo ci = {};
         ci.pQueue                    = mDevice->GetGraphicsQueue();
         ci.pSurface                  = nullptr;
+        ci.pFoveationPattern         = foveationPattern;
         ci.width                     = mSettings.window.width;
         ci.height                    = mSettings.window.height;
         ci.colorFormat               = mXrComponent.GetColorFormat();
@@ -505,6 +521,7 @@ Result Application::CreateSwapchains()
         grfx::SwapchainCreateInfo ci = {};
         ci.pQueue                    = mDevice->GetGraphicsQueue();
         ci.pSurface                  = mSurface;
+        ci.pFoveationPattern         = foveationPattern;
         ci.width                     = mSettings.window.width;
         ci.height                    = mSettings.window.height;
         ci.colorFormat               = mSettings.grfx.swapchain.colorFormat;

@@ -40,6 +40,11 @@ Result Image::CreateApiObjects(const grfx::ImageCreateInfo* pCreateInfo)
                 createFlags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
             }
 
+            if (pCreateInfo->subsampled_bit) {
+                // zzong: VUID-VkFramebufferCreateInfo-pAttachments-02552
+                // zzong: VUID-VkFramebufferCreateInfo-renderPass-02553
+                createFlags |= VK_IMAGE_CREATE_SUBSAMPLED_BIT_EXT;
+            }
             auto queueIndices = ToApi(GetDevice())->GetAllQueueFamilyIndices();
 
             VkImageCreateInfo vkci = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};

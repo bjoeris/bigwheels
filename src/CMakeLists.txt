@@ -233,6 +233,7 @@ list(
     ${INC_DIR}/ppx/grfx/grfx_draw_pass.h
     ${INC_DIR}/ppx/grfx/grfx_enums.h
     ${INC_DIR}/ppx/grfx/grfx_format.h
+    ${INC_DIR}/ppx/grfx/grfx_foveation.h
     ${INC_DIR}/ppx/grfx/grfx_fullscreen_quad.h
     ${INC_DIR}/ppx/grfx/grfx_gpu.h
     ${INC_DIR}/ppx/grfx/grfx_helper.h
@@ -260,6 +261,7 @@ list(
     ${SRC_DIR}/ppx/grfx/grfx_device.cpp
     ${SRC_DIR}/ppx/grfx/grfx_draw_pass.cpp
     ${SRC_DIR}/ppx/grfx/grfx_format.cpp
+    ${SRC_DIR}/ppx/grfx/grfx_foveation.cpp
     ${SRC_DIR}/ppx/grfx/grfx_fullscreen_quad.cpp
     ${SRC_DIR}/ppx/grfx/grfx_gpu.cpp
     ${SRC_DIR}/ppx/grfx/grfx_helper.cpp

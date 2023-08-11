@@ -16,7 +16,7 @@
 #define ppx_grfx_gpu_h
 
 #include "ppx/grfx/grfx_config.h"
-
+#include "ppx/grfx/grfx_foveation.h"
 namespace ppx {
 namespace grfx {
 
@@ -37,16 +37,18 @@ public:
     Gpu() {}
     virtual ~Gpu() {}
 
-    const char*    GetDeviceName() const { return mDeviceName.c_str(); }
-    grfx::VendorId GetDeviceVendorId() const { return mDeviceVendorId; }
+    const char*                 GetDeviceName() const { return mDeviceName.c_str(); }
+    grfx::VendorId              GetDeviceVendorId() const { return mDeviceVendorId; }
+    grfx::FoveationCapabilities GetFoveationCapabilities() const { return mFoveationCapabilities; }
 
     virtual uint32_t GetGraphicsQueueCount() const = 0;
     virtual uint32_t GetComputeQueueCount() const  = 0;
     virtual uint32_t GetTransferQueueCount() const = 0;
 
 protected:
-    std::string    mDeviceName;
-    grfx::VendorId mDeviceVendorId = grfx::VENDOR_ID_UNKNOWN;
+    std::string                 mDeviceName;
+    grfx::VendorId              mDeviceVendorId = grfx::VENDOR_ID_UNKNOWN;
+    grfx::FoveationCapabilities mFoveationCapabilities;
 };
 
 } // namespace grfx

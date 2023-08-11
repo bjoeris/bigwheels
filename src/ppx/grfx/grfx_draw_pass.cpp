@@ -30,6 +30,7 @@ DrawPassCreateInfo::DrawPassCreateInfo(const grfx::DrawPassCreateInfo& obj)
     this->width             = obj.width;
     this->height            = obj.height;
     this->renderTargetCount = obj.renderTargetCount;
+    this->pFoveationPattern = obj.pFoveationPattern;
 
     // Formats
     for (uint32_t i = 0; i < this->renderTargetCount; ++i) {
@@ -333,6 +334,10 @@ Result DrawPass::CreateApiObjects(const grfx::internal::DrawPassCreateInfo* pCre
             rpCreateInfo.depthStoreOp           = grfx::ATTACHMENT_STORE_OP_STORE;
             rpCreateInfo.stencilLoadOp          = stencilLoadOp;
             rpCreateInfo.stencilStoreOp         = grfx::ATTACHMENT_STORE_OP_STORE;
+        }
+
+        if (!IsNull(pCreateInfo->pFoveationPattern) && pCreateInfo->pFoveationPattern->GetFoveationMode() != grfx::FOVEATION_NONE) {
+            rpCreateInfo.pFoveationPattern = pCreateInfo->pFoveationPattern;
         }
 
         Pass pass      = {};

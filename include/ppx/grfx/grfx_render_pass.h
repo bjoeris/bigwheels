@@ -35,6 +35,7 @@ struct RenderPassCreateInfo
     grfx::RenderTargetClearValue renderTargetClearValues[PPX_MAX_RENDER_TARGETS] = {};
     grfx::DepthStencilClearValue depthStencilClearValue                          = {};
     grfx::Ownership              ownership                                       = grfx::OWNERSHIP_REFERENCE;
+    grfx::FoveationPattern*      pFoveationPattern                               = nullptr;
 
     void SetAllRenderTargetClearValue(const grfx::RenderTargetClearValue& value);
 };
@@ -68,6 +69,7 @@ struct RenderPassCreateInfo2
     grfx::ResourceState          renderTargetInitialStates[PPX_MAX_RENDER_TARGETS] = {grfx::RESOURCE_STATE_UNDEFINED};
     grfx::ResourceState          depthStencilInitialState                          = grfx::RESOURCE_STATE_UNDEFINED;
     grfx::Ownership              ownership                                         = grfx::OWNERSHIP_REFERENCE;
+    grfx::FoveationPattern*      pFoveationPattern                                 = nullptr;
 
     void SetAllRenderTargetUsageFlags(const grfx::ImageUsageFlags& flags);
     void SetAllRenderTargetClearValue(const grfx::RenderTargetClearValue& value);
@@ -87,6 +89,7 @@ struct RenderPassCreateInfo3
     uint32_t                     renderTargetCount                               = 0;
     grfx::Image*                 pRenderTargetImages[PPX_MAX_RENDER_TARGETS]     = {};
     grfx::Image*                 pDepthStencilImage                              = nullptr;
+    grfx::FoveationPattern*      pFoveationPattern                               = nullptr;
     grfx::ResourceState          depthStencilState                               = grfx::RESOURCE_STATE_DEPTH_STENCIL_WRITE;
     grfx::RenderTargetClearValue renderTargetClearValues[PPX_MAX_RENDER_TARGETS] = {};
     grfx::DepthStencilClearValue depthStencilClearValue                          = {};
@@ -116,12 +119,13 @@ struct RenderPassCreateInfo
         CREATE_INFO_VERSION_3         = 3,
     };
 
-    grfx::Ownership     ownership         = grfx::OWNERSHIP_REFERENCE;
-    CreateInfoVersion   version           = CREATE_INFO_VERSION_UNDEFINED;
-    uint32_t            width             = 0;
-    uint32_t            height            = 0;
-    uint32_t            renderTargetCount = 0;
-    grfx::ResourceState depthStencilState = grfx::RESOURCE_STATE_DEPTH_STENCIL_WRITE;
+    grfx::Ownership         ownership         = grfx::OWNERSHIP_REFERENCE;
+    CreateInfoVersion       version           = CREATE_INFO_VERSION_UNDEFINED;
+    uint32_t                width             = 0;
+    uint32_t                height            = 0;
+    uint32_t                renderTargetCount = 0;
+    grfx::ResourceState     depthStencilState = grfx::RESOURCE_STATE_DEPTH_STENCIL_WRITE;
+    grfx::FoveationPattern* pFoveationPattern = nullptr;
 
     // Data unique to grfx::RenderPassCreateInfo
     struct
@@ -234,6 +238,7 @@ protected:
     std::vector<grfx::ImagePtr>            mRenderTargetImages;
     grfx::ImagePtr                         mDepthStencilImage;
     bool                                   mHasLoadOpClear = false;
+    //grfx::FoveationPatternPtr              mFoveationPattern; zzong.todo
 };
 
 } // namespace grfx

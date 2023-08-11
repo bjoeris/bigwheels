@@ -175,6 +175,16 @@ Result Device::AllocateObject(grfx::DrawPass** ppObject)
     return ppx::SUCCESS;
 }
 
+Result Device::AllocateObject(grfx::FoveationPattern** ppObject)
+{
+    grfx::FoveationPattern* pObject = new grfx::FoveationPattern();
+    if (IsNull(pObject)) {
+        return ppx::ERROR_ALLOCATION_FAILED;
+    }
+    *ppObject = pObject;
+    return ppx::SUCCESS;
+}
+
 Result Device::AllocateObject(grfx::FullscreenQuad** ppObject)
 {
     grfx::FullscreenQuad* pObject = new grfx::FullscreenQuad();
@@ -350,6 +360,19 @@ void Device::DestroyFence(const grfx::Fence* pFence)
 {
     PPX_ASSERT_NULL_ARG(pFence);
     DestroyObject(mFences, pFence);
+}
+
+Result Device::CreateFoveationPattern(const grfx::FoveationPatternCreateInfo* pCreateInfo, grfx::FoveationPattern** ppFoveationPattern)
+{
+    PPX_ASSERT_NULL_ARG(pCreateInfo);
+    PPX_ASSERT_NULL_ARG(ppFoveationPattern);
+    return CreateObject(pCreateInfo, mFoveationPatterns, ppFoveationPattern);
+}
+
+void Device::DestroyFoveationPattern(const grfx::FoveationPattern* pFoveationPattern)
+{
+    PPX_ASSERT_NULL_ARG(pFoveationPattern);
+    DestroyObject(mFoveationPatterns, pFoveationPattern);
 }
 
 Result Device::CreateFullscreenQuad(const grfx::FullscreenQuadCreateInfo* pCreateInfo, grfx::FullscreenQuad** ppFullscreenQuad)

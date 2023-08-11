@@ -25,9 +25,13 @@ namespace vk {
 
 Result RenderPass::CreateRenderPass(const grfx::internal::RenderPassCreateInfo* pCreateInfo)
 {
-    bool          hasDepthSencil     = mDepthStencilView ? true : false;
-    size_t        rtvCount           = CountU32(mRenderTargetViews);
-    VkImageLayout depthStencillayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    bool hasDepthSencil      = mDepthStencilView ? true : false;
+    bool densityMapFoveation = !IsNull(pCreateInfo->pFoveationPattern) && pCreateInfo->pFoveationPattern->GetFoveationMode() == grfx::FOVEATION_DENSITY_MAP;
+
+    uint32_t      depthStencilAttachment = -1;
+    uint32_t      foveationMapAttachment = -1;
+    size_t        rtvCount               = CountU32(mRenderTargetViews);
+    VkImageLayout depthStencillayout     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     // Determine layout for depth/stencil
     {
@@ -79,7 +83,23 @@ Result RenderPass::CreateRenderPass(const grfx::internal::RenderPassCreateInfo* 
             desc.initialLayout           = depthStencillayout;
             desc.finalLayout             = depthStencillayout;
 
+            depthStencilAttachment = attachmentDesc.size();
             attachmentDesc.push_back(desc);
+        }
+        if (densityMapFoveation) {
+            VkAttachmentDescription densityMapDesc = {};
+            densityMapDesc.flags                   = 0;
+            densityMapDesc.format                  = VK_FORMAT_R8G8_UNORM;
+            densityMapDesc.samples                 = VK_SAMPLE_COUNT_1_BIT;
+            densityMapDesc.loadOp                  = VK_ATTACHMENT_LOAD_OP_LOAD; // fragmentDensityMapAttachment-02550
+            densityMapDesc.initialLayout           = VK_IMAGE_LAYOUT_GENERAL;
+            densityMapDesc.stencilLoadOp           = VK_ATTACHMENT_LOAD_OP_LOAD;
+            densityMapDesc.storeOp                 = VK_ATTACHMENT_STORE_OP_DONT_CARE; // fragmentDensityMapAttachment-02551
+            densityMapDesc.stencilStoreOp          = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            densityMapDesc.finalLayout             = VK_IMAGE_LAYOUT_GENERAL;
+            // VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT; zzong: validation error
+            foveationMapAttachment = attachmentDesc.size();
+            attachmentDesc.push_back(densityMapDesc);
         }
     }
 
@@ -95,7 +115,7 @@ Result RenderPass::CreateRenderPass(const grfx::internal::RenderPassCreateInfo* 
 
     VkAttachmentReference depthStencilRef = {};
     if (hasDepthSencil) {
-        depthStencilRef.attachment = static_cast<uint32_t>(attachmentDesc.size() - 1);
+        depthStencilRef.attachment = depthStencilAttachment;
         depthStencilRef.layout     = depthStencillayout;
     }
 
@@ -129,6 +149,19 @@ Result RenderPass::CreateRenderPass(const grfx::internal::RenderPassCreateInfo* 
     vkci.dependencyCount        = 1;
     vkci.pDependencies          = &subpassDependencies;
 
+    VkAttachmentReference                       densityMapReference = {};
+    VkRenderPassFragmentDensityMapCreateInfoEXT density_map_info    = {};
+    if (densityMapFoveation) {
+        densityMapReference.attachment = foveationMapAttachment;                           // zzong@ TODO
+        densityMapReference.layout     = VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT; // fragmentDensityMapAttachment-02549
+
+        density_map_info.sType                        = VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_CREATE_INFO_EXT;
+        density_map_info.fragmentDensityMapAttachment = densityMapReference;
+        density_map_info.pNext                        = nullptr;
+
+        vkci.pNext = &density_map_info;
+    }
+
     VkResult vkres = vk::CreateRenderPass(
         ToApi(GetDevice())->GetVkDevice(),
         &vkci,
@@ -144,8 +177,10 @@ Result RenderPass::CreateRenderPass(const grfx::internal::RenderPassCreateInfo* 
 
 Result RenderPass::CreateFramebuffer(const grfx::internal::RenderPassCreateInfo* pCreateInfo)
 {
-    bool   hasDepthSencil = mDepthStencilView ? true : false;
-    size_t rtvCount       = CountU32(mRenderTargetViews);
+    bool hasDepthSencil      = mDepthStencilView ? true : false;
+    bool densityMapFoveation = !IsNull(pCreateInfo->pFoveationPattern) && pCreateInfo->pFoveationPattern->GetFoveationMode() == grfx::FOVEATION_DENSITY_MAP;
+
+    size_t rtvCount = CountU32(mRenderTargetViews);
 
     std::vector<VkImageView> attachments;
     for (uint32_t i = 0; i < rtvCount; ++i) {
@@ -158,6 +193,9 @@ Result RenderPass::CreateFramebuffer(const grfx::internal::RenderPassCreateInfo*
         attachments.push_back(ToApi(dsv.Get())->GetVkImageView());
     }
 
+    if (densityMapFoveation) {
+        attachments.push_back(ToApi(pCreateInfo->pFoveationPattern->GetFoveationImageViewPtr().Get())->GetVkImageView());
+    }
     VkFramebufferCreateInfo vkci = {VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
     vkci.flags                   = 0;
     vkci.renderPass              = mRenderPass;
@@ -224,7 +262,10 @@ VkResult CreateTransientRenderPass(
     VkSampleCountFlagBits sampleCount,
     VkRenderPass*         pRenderPass)
 {
-    bool hasDepthSencil = (depthStencilFormat != VK_FORMAT_UNDEFINED);
+    bool     hasDepthSencil         = (depthStencilFormat != VK_FORMAT_UNDEFINED);
+    bool     densityMapFoveation    = true; // zzong todo
+    uint32_t depthStencilAttachment = -1;
+    uint32_t foveationMapAttachment = -1;
 
     std::vector<VkAttachmentDescription> attachmentDescs;
     {
@@ -246,7 +287,23 @@ VkResult CreateTransientRenderPass(
             desc.loadOp                  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             desc.stencilLoadOp           = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
             desc.finalLayout             = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            depthStencilAttachment       = attachmentDescs.size();
             attachmentDescs.push_back(desc);
+        }
+
+        if (densityMapFoveation) {
+            VkAttachmentDescription densityMapDesc = {};
+            densityMapDesc.flags                   = 0;
+            densityMapDesc.format                  = VK_FORMAT_R8G8_UNORM;
+            densityMapDesc.samples                 = VK_SAMPLE_COUNT_1_BIT;
+            densityMapDesc.loadOp                  = VK_ATTACHMENT_LOAD_OP_LOAD; // fragmentDensityMapAttachment-02550
+            densityMapDesc.initialLayout           = VK_IMAGE_LAYOUT_GENERAL;
+            densityMapDesc.stencilLoadOp           = VK_ATTACHMENT_LOAD_OP_LOAD;
+            densityMapDesc.storeOp                 = VK_ATTACHMENT_STORE_OP_DONT_CARE; // fragmentDensityMapAttachment-02551
+            densityMapDesc.stencilStoreOp          = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            densityMapDesc.finalLayout             = VK_IMAGE_LAYOUT_GENERAL;          // VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT; zzong???? validation error
+            foveationMapAttachment                 = attachmentDescs.size();
+            attachmentDescs.push_back(densityMapDesc);
         }
     }
 
@@ -262,7 +319,7 @@ VkResult CreateTransientRenderPass(
 
     VkAttachmentReference depthStencilRef = {};
     if (hasDepthSencil) {
-        depthStencilRef.attachment = static_cast<uint32_t>(attachmentDescs.size() - 1);
+        depthStencilRef.attachment = depthStencilAttachment;
         depthStencilRef.layout     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     }
 
@@ -296,6 +353,17 @@ VkResult CreateTransientRenderPass(
     vkci.dependencyCount        = 1;
     vkci.pDependencies          = &subpassDependencies;
 
+    VkRenderPassFragmentDensityMapCreateInfoEXT density_map_info    = {};
+    VkAttachmentReference                       densityMapReference = {};
+    if (densityMapFoveation) {
+        densityMapReference.attachment = attachmentDescs.size() - 1;
+        densityMapReference.layout     = VK_IMAGE_LAYOUT_FRAGMENT_DENSITY_MAP_OPTIMAL_EXT; // fragmentDensityMapAttachment-02549
+
+        density_map_info.sType                        = VK_STRUCTURE_TYPE_RENDER_PASS_FRAGMENT_DENSITY_MAP_CREATE_INFO_EXT;
+        density_map_info.fragmentDensityMapAttachment = densityMapReference;
+        density_map_info.pNext                        = nullptr;
+        vkci.pNext                                    = &density_map_info;
+    }
     VkResult vkres = vkCreateRenderPass(
         device,
         &vkci,

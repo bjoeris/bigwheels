@@ -20,6 +20,7 @@
 #include "ppx/grfx/grfx_command.h"
 #include "ppx/grfx/grfx_descriptor.h"
 #include "ppx/grfx/grfx_draw_pass.h"
+#include "ppx/grfx/grfx_foveation.h"
 #include "ppx/grfx/grfx_fullscreen_quad.h"
 #include "ppx/grfx/grfx_image.h"
 #include "ppx/grfx/grfx_mesh.h"
@@ -96,6 +97,9 @@ public:
 
     Result CreateFence(const grfx::FenceCreateInfo* pCreateInfo, grfx::Fence** ppFence);
     void   DestroyFence(const grfx::Fence* pFence);
+
+    Result CreateFoveationPattern(const grfx::FoveationPatternCreateInfo* pCreateInfo, grfx::FoveationPattern** ppFoveationPattern);
+    void   DestroyFoveationPattern(const grfx::FoveationPattern* pFoveationPattern);
 
     Result CreateFullscreenQuad(const grfx::FullscreenQuadCreateInfo* pCreateInfo, grfx::FullscreenQuad** ppFullscreenQuad);
     void   DestroyFullscreenQuad(const grfx::FullscreenQuad* pFullscreenQuad);
@@ -215,6 +219,7 @@ protected:
     virtual Result AllocateObject(grfx::Swapchain** ppObject)           = 0;
 
     virtual Result AllocateObject(grfx::DrawPass** ppObject);
+    virtual Result AllocateObject(grfx::FoveationPattern** ppObject);
     virtual Result AllocateObject(grfx::FullscreenQuad** ppObject);
     virtual Result AllocateObject(grfx::Mesh** ppObject);
     virtual Result AllocateObject(grfx::TextDraw** ppObject);
@@ -251,6 +256,7 @@ protected:
     std::vector<grfx::DescriptorSetLayoutPtr> mDescriptorSetLayouts;
     std::vector<grfx::DrawPassPtr>            mDrawPasses;
     std::vector<grfx::FencePtr>               mFences;
+    std::vector<grfx::FoveationPatternPtr>    mFoveationPatterns;
     std::vector<grfx::FullscreenQuadPtr>      mFullscreenQuads;
     std::vector<grfx::GraphicsPipelinePtr>    mGraphicsPipelines;
     std::vector<grfx::ImagePtr>               mImages;

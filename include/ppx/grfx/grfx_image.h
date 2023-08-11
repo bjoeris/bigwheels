@@ -41,6 +41,7 @@ struct ImageCreateInfo
     void*                        pApiObject                = nullptr;                      // [OPTIONAL] For external images such as swapchain images
     grfx::Ownership              ownership                 = grfx::OWNERSHIP_REFERENCE;
     bool                         concurrentMultiQueueUsage = false;
+    bool                         subsampled_bit            = false; //zzong todo
 
     // Returns a create info for sampled image
     static ImageCreateInfo SampledImage2D(

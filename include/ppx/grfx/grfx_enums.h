@@ -259,6 +259,13 @@ enum Filter
     FILTER_LINEAR  = 1,
 };
 
+enum FoveationMode
+{
+    FOVEATION_NONE        = 0,
+    FOVEATION_DENSITY_MAP = 1,
+    FOVEATION_VRS         = 2, //TODO(zzong) Implement support for VRS based foveation.
+};
+
 enum FrontFace
 {
     FRONT_FACE_CCW = 0, // Counter clockwise

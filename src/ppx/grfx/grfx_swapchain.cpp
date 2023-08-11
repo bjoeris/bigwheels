@@ -247,6 +247,7 @@ Result Swapchain::CreateRenderPasses()
         rpCreateInfo.renderTargetClearValues[0]  = {{0.0f, 0.0f, 0.0f, 0.0f}};
         rpCreateInfo.depthStencilClearValue      = {1.0f, 0xFF};
         rpCreateInfo.ownership                   = grfx::OWNERSHIP_RESTRICTED;
+        rpCreateInfo.pFoveationPattern           = mCreateInfo.pFoveationPattern;
 
         grfx::RenderPassPtr renderPass;
         auto                ppxres = GetDevice()->CreateRenderPass(&rpCreateInfo, &renderPass);
@@ -269,6 +270,7 @@ Result Swapchain::CreateRenderPasses()
         rpCreateInfo.renderTargetClearValues[0]  = {{0.0f, 0.0f, 0.0f, 0.0f}};
         rpCreateInfo.depthStencilClearValue      = {1.0f, 0xFF};
         rpCreateInfo.ownership                   = grfx::OWNERSHIP_RESTRICTED;
+        rpCreateInfo.pFoveationPattern           = mCreateInfo.pFoveationPattern;
 
         grfx::RenderPassPtr renderPass;
         auto                ppxres = GetDevice()->CreateRenderPass(&rpCreateInfo, &renderPass);

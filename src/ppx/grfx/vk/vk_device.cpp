@@ -154,6 +154,25 @@ Result Device::ConfigureExtensions(const grfx::DeviceCreateInfo* pCreateInfo)
         }
     }
 
+    // Discrete VRS
+    if (ElementExists(std::string(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME), mFoundExtensions)) {
+        mExtensions.push_back(VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME);
+        PPX_LOG_INFO("[zzong] discrete vrs extension supported.");
+    }
+// Mobile foveation
+#ifdef PPX_ANDROID
+    {
+        PPX_LOG_INFO("[zzong] checking and adding density map extensions");
+        if (ElementExists(std::string(VK_EXT_FRAGMENT_DENSITY_MAP_EXTENSION_NAME), mFoundExtensions)) {
+            mExtensions.push_back(VK_EXT_FRAGMENT_DENSITY_MAP_EXTENSION_NAME);
+            PPX_LOG_INFO("[zzong] vk density map 1.0 added");
+        }
+        if (ElementExists(std::string(VK_EXT_FRAGMENT_DENSITY_MAP_2_EXTENSION_NAME), mFoundExtensions)) {
+            mExtensions.push_back(VK_EXT_FRAGMENT_DENSITY_MAP_2_EXTENSION_NAME);
+            PPX_LOG_INFO("[zzong] vk density map 2.0 added");
+        }
+    }
+#endif
 #if defined(PPX_VK_EXTENDED_DYNAMIC_STATE)
     if (ElementExists(std::string(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME), mFoundExtensions)) {
         mExtensions.push_back(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME);
@@ -181,8 +200,25 @@ Result Device::ConfigureFeatures(const grfx::DeviceCreateInfo* pCreateInfo, VkPh
 {
     vk::Gpu* pGpu = ToApi(pCreateInfo->pGpu);
 
-    VkPhysicalDeviceFeatures foundFeatures = {};
-    vkGetPhysicalDeviceFeatures(pGpu->GetVkGpu(), &foundFeatures);
+    VkPhysicalDeviceFragmentShadingRateFeaturesKHR vrsFeatures = {};
+    vrsFeatures.sType                                          = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR;
+    vrsFeatures.pNext                                          = nullptr;
+    VkPhysicalDeviceFeatures2 foundFeatures                    = {};
+
+    foundFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    foundFeatures.pNext = &vrsFeatures;
+
+    PFN_vkGetPhysicalDeviceFeatures2 vkGetPhysicalDeviceFeatures2_func =
+        (PFN_vkGetPhysicalDeviceFeatures2)vkGetInstanceProcAddr(ToApi(GetInstance())->GetVkInstance(), "vkGetPhysicalDeviceFeatures2");
+    if (vkGetPhysicalDeviceFeatures2_func == nullptr) {
+        vkGetPhysicalDeviceFeatures2_func = (PFN_vkGetPhysicalDeviceFeatures2)vkGetInstanceProcAddr(ToApi(GetInstance())->GetVkInstance(), "vkGetPhysicalDeviceFeatures2");
+    }
+    if (vkGetPhysicalDeviceFeatures2_func != nullptr) {
+        vkGetPhysicalDeviceFeatures2_func(pGpu->GetVkGpu(), &foundFeatures);
+    }
+    else {
+        vkGetPhysicalDeviceFeatures(pGpu->GetVkGpu(), &foundFeatures.features);
+    }
 
     // Default device features
     //
@@ -192,20 +228,63 @@ Result Device::ConfigureFeatures(const grfx::DeviceCreateInfo* pCreateInfo, VkPh
     features                                      = {};
     features.fullDrawIndexUint32                  = VK_TRUE;
     features.imageCubeArray                       = VK_TRUE;
-    features.independentBlend                     = foundFeatures.independentBlend;
-    features.pipelineStatisticsQuery              = foundFeatures.pipelineStatisticsQuery;
-    features.geometryShader                       = foundFeatures.geometryShader;
-    features.tessellationShader                   = foundFeatures.tessellationShader;
-    features.fragmentStoresAndAtomics             = foundFeatures.fragmentStoresAndAtomics;
-    features.shaderStorageImageReadWithoutFormat  = foundFeatures.shaderStorageImageReadWithoutFormat;
-    features.shaderStorageImageWriteWithoutFormat = foundFeatures.shaderStorageImageWriteWithoutFormat;
-    features.shaderStorageImageMultisample        = foundFeatures.shaderStorageImageMultisample;
-    features.samplerAnisotropy                    = foundFeatures.samplerAnisotropy;
+    features.independentBlend                     = foundFeatures.features.independentBlend;
+    features.pipelineStatisticsQuery              = foundFeatures.features.pipelineStatisticsQuery;
+    features.geometryShader                       = foundFeatures.features.geometryShader;
+    features.tessellationShader                   = foundFeatures.features.tessellationShader;
+    features.fragmentStoresAndAtomics             = foundFeatures.features.fragmentStoresAndAtomics;
+    features.shaderStorageImageReadWithoutFormat  = foundFeatures.features.shaderStorageImageReadWithoutFormat;
+    features.shaderStorageImageWriteWithoutFormat = foundFeatures.features.shaderStorageImageWriteWithoutFormat;
+    features.shaderStorageImageMultisample        = foundFeatures.features.shaderStorageImageMultisample;
+    features.samplerAnisotropy                    = foundFeatures.features.samplerAnisotropy;
 
     // Select between default or custom features.
     if (!IsNull(pCreateInfo->pVulkanDeviceFeatures)) {
         const VkPhysicalDeviceFeatures* pFeatures = static_cast<const VkPhysicalDeviceFeatures*>(pCreateInfo->pVulkanDeviceFeatures);
         features                                  = *pFeatures;
+    }
+
+    mVrsConfigs.enable_pipeline_vrs   = vrsFeatures.pipelineFragmentShadingRate;
+    mVrsConfigs.enable_primitive_vrs = vrsFeatures.primitiveFragmentShadingRate;
+    mVrsConfigs.enable_attachment_vrs = vrsFeatures.attachmentFragmentShadingRate;
+    PPX_LOG_INFO("[zzong] enable_pipeline_vrs: " << mVrsConfigs.enable_pipeline_vrs);
+    PPX_LOG_INFO("[zzong] enable_primitive_vrs: " << mVrsConfigs.enable_primitive_vrs);
+    PPX_LOG_INFO("[zzong] enable_attachment_vrs: " << mVrsConfigs.enable_attachment_vrs);
+
+    return ppx::SUCCESS;
+}
+
+Result Device::ConfigureVrsProperties(const grfx::DeviceCreateInfo* pCreateInfo, VrsConfigs& vrsConfigs)
+{
+    // zzong@ get supported shading rate. TODO: Store properties somewhere
+    {
+        vk::Gpu* pGpu          = ToApi(pCreateInfo->pGpu);
+        auto     vrsProperties = pGpu->GetVrsProperties();
+
+        // zzong. use min texel size
+        vrsConfigs.texel_width  = vrsProperties->minFragmentShadingRateAttachmentTexelSize.width;
+        vrsConfigs.texel_height = vrsProperties->minFragmentShadingRateAttachmentTexelSize.height;
+
+        PPX_LOG_INFO("[zzong] vrsProperties texel size x:" << vrsProperties->maxFragmentShadingRateAttachmentTexelSize.height);
+
+        PFN_vkGetPhysicalDeviceFragmentShadingRatesKHR
+            mFnGetPhysicalDeviceFragmentShadingRatesKHR =
+                (PFN_vkGetPhysicalDeviceFragmentShadingRatesKHR)vkGetInstanceProcAddr(
+                    ToApi(GetInstance())->GetVkInstance(), "vkGetPhysicalDeviceFragmentShadingRatesKHR");
+
+        if (mFnGetPhysicalDeviceFragmentShadingRatesKHR == nullptr) {
+            PPX_LOG_INFO("[zzong] Failed to load vkGetPhysicalDeviceFragmentShadingRatesKHR");
+            return ppx::ERROR_FAILED;
+        }
+        else {
+            uint32_t                                            fragmentShadingRateCount;
+            VkResult                                            vkres = mFnGetPhysicalDeviceFragmentShadingRatesKHR(pGpu->GetVkGpu(), &fragmentShadingRateCount, nullptr);
+            std::vector<VkPhysicalDeviceFragmentShadingRateKHR> fragmentShadingRates(fragmentShadingRateCount, VkPhysicalDeviceFragmentShadingRateKHR{
+                                                                                                                   .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_KHR,
+                                                                                                               });
+            vkres = mFnGetPhysicalDeviceFragmentShadingRatesKHR(pGpu->GetVkGpu(), &fragmentShadingRateCount, fragmentShadingRates.data());
+            vrsConfigs.UpdateSupportedrates(fragmentShadingRates);
+        }
     }
 
     return ppx::SUCCESS;
@@ -281,6 +360,12 @@ Result Device::CreateApiObjects(const grfx::DeviceCreateInfo* pCreateInfo)
         return ppxres;
     }
 
+    ppxres = ConfigureVrsProperties(pCreateInfo, mVrsConfigs);
+    if (Failed(ppxres)) {
+        PPX_LOG_INFO("[zzong] ConfigureVrsPropertiesfailed");
+        return ppxres;
+    }
+
     // We can't include structs whose extesnions aren't enabled, so do the tracking.
     std::vector<VkBaseOutStructure*> extensionStructs;
 
@@ -329,6 +414,13 @@ Result Device::CreateApiObjects(const grfx::DeviceCreateInfo* pCreateInfo)
         queryResetFeatures.hostQueryReset = VK_TRUE;
 
         extensionStructs.push_back(reinterpret_cast<VkBaseOutStructure*>(&queryResetFeatures));
+    }
+
+    // zzong@ indicate support for VRS. TODO. set from setting and mVRSConfig
+    VkPhysicalDeviceFragmentShadingRateFeaturesKHR fragmentShadingRateFeature = {VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_FEATURES_KHR};
+    {
+        fragmentShadingRateFeature.attachmentFragmentShadingRate = false; // zzong. todo
+        extensionStructs.push_back(reinterpret_cast<VkBaseOutStructure*>(&fragmentShadingRateFeature));
     }
 
     // Chain pNexts

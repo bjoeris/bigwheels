@@ -218,6 +218,19 @@ void ProjApp::SetupGBufferPasses()
 {
     // GBuffer render draw pass
     {
+        // Create foveation pattern for draw pass
+        grfx::FoveationPatternPtr foveationPattern = nullptr;
+        if (GetSettings()->grfx.foveationMode != grfx::FOVEATION_NONE) {
+            grfx::FoveationPatternCreateInfo foveationInfo = {};
+            foveationInfo.fbWidth                          = GetWindowWidth();
+            foveationInfo.fbHeight                         = GetWindowHeight();
+            foveationInfo.foveationMode                    = grfx::FOVEATION_DENSITY_MAP;//GetSettings()->grfx.foveationMode
+            Result ppxres                                  = GetDevice()->CreateFoveationPattern(&foveationInfo, &foveationPattern);
+            if (Failed(ppxres)) {
+                PPX_ASSERT_MSG(false, "[zzong] gbuffer: FoveationPattern create failed");
+            }
+            PPX_LOG_INFO("[zzong] gbuffer: Foveation pattern created");
+        }
         // Usage flags for render target and depth stencil will automatically
         // be added during create. So we only need to specify the additional
         // usage flags here.
@@ -250,6 +263,7 @@ void ProjApp::SetupGBufferPasses()
         createInfo.renderTargetClearValues[2]   = rtvClearValue;
         createInfo.renderTargetClearValues[3]   = rtvClearValue;
         createInfo.depthStencilClearValue       = dsvClearValue;
+        createInfo.pFoveationPattern            = foveationPattern;
 
         PPX_CHECKED_CALL(GetDevice()->CreateDrawPass(&createInfo, &mGBufferRenderPass));
     }

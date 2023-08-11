@@ -106,6 +106,7 @@ RenderPassCreateInfo::RenderPassCreateInfo(const grfx::RenderPassCreateInfo& obj
     this->height            = obj.height;
     this->renderTargetCount = obj.renderTargetCount;
     this->depthStencilState = obj.depthStencilState;
+    this->pFoveationPattern = obj.pFoveationPattern;
 
     // Views
     for (uint32_t i = 0; i < this->renderTargetCount; ++i) {
@@ -126,6 +127,7 @@ RenderPassCreateInfo::RenderPassCreateInfo(const grfx::RenderPassCreateInfo2& ob
     this->width             = obj.width;
     this->height            = obj.height;
     this->renderTargetCount = obj.renderTargetCount;
+    this->pFoveationPattern = obj.pFoveationPattern;
 
     // Formats
     for (uint32_t i = 0; i < this->renderTargetCount; ++i) {
@@ -172,6 +174,7 @@ RenderPassCreateInfo::RenderPassCreateInfo(const grfx::RenderPassCreateInfo3& ob
     this->height            = obj.height;
     this->renderTargetCount = obj.renderTargetCount;
     this->depthStencilState = obj.depthStencilState;
+    this->pFoveationPattern = obj.pFoveationPattern;
 
     // Images
     for (uint32_t i = 0; i < this->renderTargetCount; ++i) {
@@ -244,7 +247,7 @@ Result RenderPass::CreateImagesAndViewsV2(const grfx::internal::RenderPassCreate
             if (pCreateInfo->V2.renderTargetInitialStates[i] != grfx::RESOURCE_STATE_UNDEFINED) {
                 initialState = pCreateInfo->V2.renderTargetInitialStates[i];
             }
-
+            // zzong: VUID-VkFramebufferCreateInfo-pAttachments-02552
             grfx::ImageCreateInfo imageCreateInfo = {};
             imageCreateInfo.type                  = grfx::IMAGE_TYPE_2D;
             imageCreateInfo.width                 = pCreateInfo->width;

@@ -97,14 +97,15 @@ public:
 //!
 struct SwapchainCreateInfo
 {
-    grfx::Queue*      pQueue      = nullptr;
-    grfx::Surface*    pSurface    = nullptr;
-    uint32_t          width       = 0;
-    uint32_t          height      = 0;
-    grfx::Format      colorFormat = grfx::FORMAT_UNDEFINED;
-    grfx::Format      depthFormat = grfx::FORMAT_UNDEFINED;
-    uint32_t          imageCount  = 0;
-    grfx::PresentMode presentMode = grfx::PRESENT_MODE_IMMEDIATE;
+    grfx::Queue*            pQueue            = nullptr;
+    grfx::Surface*          pSurface          = nullptr;
+    grfx::FoveationPattern* pFoveationPattern = nullptr;
+    uint32_t                width             = 0;
+    uint32_t                height            = 0;
+    grfx::Format            colorFormat       = grfx::FORMAT_UNDEFINED;
+    grfx::Format            depthFormat       = grfx::FORMAT_UNDEFINED;
+    uint32_t                imageCount        = 0;
+    grfx::PresentMode       presentMode       = grfx::PRESENT_MODE_IMMEDIATE;
 #if defined(PPX_BUILD_XR)
     XrComponent* pXrComponent = nullptr;
 #endif
