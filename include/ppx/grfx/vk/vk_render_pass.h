@@ -53,7 +53,8 @@ VkResult CreateTransientRenderPass(
     const VkFormat*       pRenderTargetFormats,
     VkFormat              depthStencilFormat,
     VkSampleCountFlagBits sampleCount,
-    VkRenderPass*         pRenderPass);
+    VkRenderPass*         pRenderPass,
+    grfx::FoveationMode   foveationMode = grfx::FOVEATION_NONE);
 
 } // namespace vk
 } // namespace grfx

@@ -86,6 +86,7 @@ grfx::GraphicsPipelinePtr FishTornadoApp::CreateForwardPipeline(
     gpCreateInfo.outputState.renderTargetFormats[0] = GetSwapchain()->GetColorFormat();
     gpCreateInfo.outputState.depthStencilFormat     = GetSwapchain()->GetDepthFormat();
     gpCreateInfo.pPipelineInterface                 = IsNull(pPipelineInterface) ? mForwardPipelineInterface.Get() : pPipelineInterface;
+    gpCreateInfo.foveationMode                      = kFoveation;
     // Vertex description
     gpCreateInfo.vertexInputState.bindingCount = vertexDescription.GetBindingCount();
     for (uint32_t i = 0; i < vertexDescription.GetBindingCount(); ++i) {
@@ -123,6 +124,7 @@ grfx::GraphicsPipelinePtr FishTornadoApp::CreateShadowPipeline(
     gpCreateInfo.outputState.renderTargetCount     = 0;
     gpCreateInfo.outputState.depthStencilFormat    = grfx::FORMAT_D32_FLOAT;
     gpCreateInfo.pPipelineInterface                = IsNull(pPipelineInterface) ? mForwardPipelineInterface.Get() : pPipelineInterface;
+    gpCreateInfo.foveationMode                     = grfx::FOVEATION_NONE;
 
     grfx::GraphicsPipelinePtr pipeline;
     PPX_CHECKED_CALL(GetDevice()->CreateGraphicsPipeline(&gpCreateInfo, &pipeline));
@@ -144,6 +146,7 @@ void FishTornadoApp::Config(ppx::ApplicationSettings& settings)
     settings.xr.enableDebugCapture      = false;
     settings.grfx.swapchain.imageCount  = 3;
     settings.grfx.swapchain.depthFormat = grfx::FORMAT_D32_FLOAT;
+    settings.grfx.foveationMode         = kFoveation;
 
     settings.grfx.device.computeQueueCount = 1;
 }

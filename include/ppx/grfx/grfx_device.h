@@ -182,11 +182,13 @@ public:
 
     grfx::QueuePtr GetAnyAvailableQueue() const;
 
+    grfx::FoveationCapabilities GetFoveationCapabilities() const { return mFoveationCapabilities; }
+
     virtual Result WaitIdle() = 0;
 
-    virtual bool PipelineStatsAvailable() const    = 0;
-    virtual bool DynamicRenderingSupported() const = 0;
-    virtual bool IndependentBlendingSupported() const = 0;
+    virtual bool PipelineStatsAvailable() const            = 0;
+    virtual bool DynamicRenderingSupported() const         = 0;
+    virtual bool IndependentBlendingSupported() const      = 0;
     virtual bool FragmentStoresAndAtomicsSupported() const = 0;
 
 protected:
@@ -278,6 +280,7 @@ protected:
     std::vector<grfx::QueuePtr>               mGraphicsQueues;
     std::vector<grfx::QueuePtr>               mComputeQueues;
     std::vector<grfx::QueuePtr>               mTransferQueues;
+    grfx::FoveationCapabilities               mFoveationCapabilities;
 };
 
 } // namespace grfx

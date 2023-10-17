@@ -171,6 +171,7 @@ struct GraphicsPipelineCreateInfo
     grfx::DepthStencilState        depthStencilState  = {};
     grfx::ColorBlendState          colorBlendState    = {};
     grfx::OutputState              outputState        = {};
+    grfx::FoveationMode            foveationMode      = grfx::FOVEATION_NONE;
     const grfx::PipelineInterface* pPipelineInterface = nullptr;
 };
 
@@ -188,6 +189,7 @@ struct GraphicsPipelineCreateInfo2
     grfx::CompareOp                depthCompareOp                     = grfx::COMPARE_OP_LESS;
     grfx::BlendMode                blendModes[PPX_MAX_RENDER_TARGETS] = {grfx::BLEND_MODE_NONE};
     grfx::OutputState              outputState                        = {};
+    grfx::FoveationMode            foveationMode                      = grfx::FOVEATION_NONE;
     const grfx::PipelineInterface* pPipelineInterface                 = nullptr;
 };
 

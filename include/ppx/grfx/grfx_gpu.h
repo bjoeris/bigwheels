@@ -37,18 +37,16 @@ public:
     Gpu() {}
     virtual ~Gpu() {}
 
-    const char*                 GetDeviceName() const { return mDeviceName.c_str(); }
-    grfx::VendorId              GetDeviceVendorId() const { return mDeviceVendorId; }
-    grfx::FoveationCapabilities GetFoveationCapabilities() const { return mFoveationCapabilities; }
+    const char*    GetDeviceName() const { return mDeviceName.c_str(); }
+    grfx::VendorId GetDeviceVendorId() const { return mDeviceVendorId; }
 
     virtual uint32_t GetGraphicsQueueCount() const = 0;
     virtual uint32_t GetComputeQueueCount() const  = 0;
     virtual uint32_t GetTransferQueueCount() const = 0;
 
 protected:
-    std::string                 mDeviceName;
-    grfx::VendorId              mDeviceVendorId = grfx::VENDOR_ID_UNKNOWN;
-    grfx::FoveationCapabilities mFoveationCapabilities;
+    std::string    mDeviceName;
+    grfx::VendorId mDeviceVendorId = grfx::VENDOR_ID_UNKNOWN;
 };
 
 } // namespace grfx

@@ -22,32 +22,6 @@ namespace ppx {
 namespace grfx {
 namespace vk {
 
-struct VrsConfigs
-// TODO: zzong, move to grfx_device once dx VRS is supported
-{
-    bool     enable_pipeline_vrs   = false;
-    bool     enable_primitive_vrs  = false;
-    bool     enable_attachment_vrs = false;
-    uint32_t texel_width           = 0;
-    uint32_t texel_height          = 0;
-
-    std::vector<std::vector<uint32_t>> supported_shading_rates;
-    uint32_t                           GetTexelValueOfRate(VkExtent2D rate)
-    {
-        // Use 1x1 (texel value 0) when requested rate is not supported
-        return supported_shading_rates[rate.width >> 1][rate.height >> 1];
-    };
-    void UpdateSupportedrates(std::vector<VkPhysicalDeviceFragmentShadingRateKHR> fragmentShadingRates)
-    {
-        supported_shading_rates.resize(3, std::vector<uint32_t>(3, 0)); // Set all with 1x1 rate (texel value 0)
-        for (const auto& rate : fragmentShadingRates) {
-            uint32_t w                              = rate.fragmentSize.width;
-            uint32_t h                              = rate.fragmentSize.height;
-            supported_shading_rates[w >> 1][h >> 1] = ((w >> 1) << 2) + (h >> 1);
-        }
-    };
-};
-
 class Device
     : public grfx::Device
 {
@@ -116,7 +90,8 @@ private:
     Result ConfigureQueueInfo(const grfx::DeviceCreateInfo* pCreateInfo, std::vector<float>& queuePriorities, std::vector<VkDeviceQueueCreateInfo>& queueCreateInfos);
     Result ConfigureExtensions(const grfx::DeviceCreateInfo* pCreateInfo);
     Result ConfigureFeatures(const grfx::DeviceCreateInfo* pCreateInfo, VkPhysicalDeviceFeatures& features);
-    Result ConfigureVrsProperties(const grfx::DeviceCreateInfo* pCreateInfo, VrsConfigs& vrsConfigs);
+    Result ConfigureFoveation(const grfx::DeviceCreateInfo* pCreateInfo, grfx::FoveationCapabilities& foveationCapabilities);
+    Result ConfigureFdmProperties(const grfx::DeviceCreateInfo* pCreateInfo, grfx::FoveationCapabilities& foveationCapabilities);
     Result CreateQueues(const grfx::DeviceCreateInfo* pCreateInfo);
 
 private:
@@ -134,7 +109,6 @@ private:
     uint32_t                 mComputeQueueFamilyIndex   = 0;
     uint32_t                 mTransferQueueFamilyIndex  = 0;
     uint32_t                 mMaxPushDescriptors        = 0;
-    VrsConfigs               mVrsConfigs;
 };
 
 extern PFN_vkCmdPushDescriptorSetKHR CmdPushDescriptorSetKHR;

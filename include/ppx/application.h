@@ -296,17 +296,12 @@ struct ApplicationSettings
 
     struct
     {
-        grfx::Api api               = grfx::API_UNDEFINED;
-        bool      enableDebug       = false;
-        uint32_t  numFramesInFlight = 1;
-        uint32_t  pacedFrameRate    = 60;
-#if defined(PPX_ANDROID) // @zzong,TODO
-        grfx::FoveationMode foveationMode = grfx::FOVEATION_DENSITY_MAP;
-        // grfx::FoveationMode foveationMode = grfx::FOVEATION_VRS;
-        // grfx::FoveationMode foveationMode = grfx::FOVEATION_NONE;
-#else
-        grfx::FoveationMode foveationMode = grfx::FOVEATION_NONE;
-#endif
+        grfx::Api           api               = grfx::API_UNDEFINED;
+        bool                enableDebug       = false;
+        uint32_t            numFramesInFlight = 1;
+        uint32_t            pacedFrameRate    = 60;
+        grfx::FoveationMode foveationMode     = grfx::FOVEATION_NONE;
+
         struct
         {
             uint32_t gpuIndex           = 0;

@@ -31,16 +31,15 @@ public:
 
     VkPhysicalDevicePtr GetVkGpu() const { return mGpu; }
 
-    const VkPhysicalDeviceLimits& GetLimits() const { return mGpuProperties.properties.limits; }
+    const VkPhysicalDeviceLimits& GetLimits() const { return mGpuProperties.limits; }
 
     float GetTimestampPeriod() const;
 
     uint32_t GetQueueFamilyCount() const;
 
-    uint32_t                                                GetGraphicsQueueFamilyIndex() const;
-    uint32_t                                                GetComputeQueueFamilyIndex() const;
-    uint32_t                                                GetTransferQueueFamilyIndex() const;
-    const VkPhysicalDeviceFragmentShadingRatePropertiesKHR* GetVrsProperties() const { return &mVrsProperties; };
+    uint32_t GetGraphicsQueueFamilyIndex() const;
+    uint32_t GetComputeQueueFamilyIndex() const;
+    uint32_t GetTransferQueueFamilyIndex() const;
 
     virtual uint32_t GetGraphicsQueueCount() const override;
     virtual uint32_t GetComputeQueueCount() const override;
@@ -51,11 +50,9 @@ protected:
     virtual void   DestroyApiObjects() override;
 
 private:
-    VkPhysicalDevicePtr                              mGpu;
-    VkPhysicalDeviceProperties2                      mGpuProperties;
-    VkPhysicalDeviceFeatures2                        mGpuFeatures;
-    VkPhysicalDeviceFragmentShadingRatePropertiesKHR mVrsProperties{.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_SHADING_RATE_PROPERTIES_KHR};
-
+    VkPhysicalDevicePtr                  mGpu;
+    VkPhysicalDeviceProperties           mGpuProperties;
+    VkPhysicalDeviceFeatures             mGpuFeatures;
     std::vector<VkQueueFamilyProperties> mQueueFamilies;
 };
 

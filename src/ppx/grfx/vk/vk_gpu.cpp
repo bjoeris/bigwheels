@@ -51,35 +51,9 @@ Result Gpu::CreateApiObjects(const grfx::internal::GpuCreateInfo* pCreateInfo)
 
     mGpu = static_cast<VkPhysicalDevice>(pCreateInfo->pApiObject);
 
-    VkPhysicalDeviceFragmentDensityMapPropertiesEXT densityMapProperties;
-    densityMapProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_PROPERTIES_EXT;
-    densityMapProperties.pNext = &mVrsProperties;
+    vkGetPhysicalDeviceProperties(mGpu, &mGpuProperties);
 
-    mGpuProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
-    mGpuProperties.pNext = &densityMapProperties;
-    vkGetPhysicalDeviceProperties2(mGpu, &mGpuProperties);
-
-    PPX_LOG_INFO("[zzong] densityMapProperties.fragmentDensityInvocations: " << densityMapProperties.fragmentDensityInvocations);
-    PPX_LOG_INFO("[zzong] densityMapProperties.maxFragmentDensityTexelSize: " << densityMapProperties.maxFragmentDensityTexelSize.width << ", " << densityMapProperties.maxFragmentDensityTexelSize.height);
-    PPX_LOG_INFO("[zzong] densityMapProperties.minFragmentDensityTexelSize: " << densityMapProperties.minFragmentDensityTexelSize.width << ", " << densityMapProperties.minFragmentDensityTexelSize.height);
-
-    VkPhysicalDeviceFragmentDensityMapFeaturesEXT densityMapFeatures;
-    densityMapFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_FEATURES_EXT;
-    densityMapFeatures.pNext = nullptr; // zzong todo VkPhysicalDeviceFragmentDensityMap2FeaturesEXT
-
-    mGpuFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-    mGpuFeatures.pNext = &densityMapFeatures;
-    vkGetPhysicalDeviceFeatures2(mGpu, &mGpuFeatures);
-
-    mFoveationCapabilities.densityMap.supported = densityMapFeatures.fragmentDensityMap == VK_TRUE;
-    PPX_LOG_INFO("[zzong] vk:  mFoveationCapabilities.densityMap.supported: " << mFoveationCapabilities.densityMap.supported);
-    mFoveationCapabilities.densityMap.supportsDynamicImageView      = densityMapFeatures.fragmentDensityMapDynamic == VK_TRUE;
-    mFoveationCapabilities.densityMap.supportsAdditionalInvocations = densityMapProperties.fragmentDensityInvocations == VK_TRUE;
-    mFoveationCapabilities.densityMap.supportsNonSubsampledImages   = densityMapFeatures.fragmentDensityMapNonSubsampledImages == VK_TRUE;
-    mFoveationCapabilities.densityMap.texelSize.min.width           = densityMapProperties.minFragmentDensityTexelSize.width;
-    mFoveationCapabilities.densityMap.texelSize.min.height          = densityMapProperties.minFragmentDensityTexelSize.height;
-    mFoveationCapabilities.densityMap.texelSize.max.width           = densityMapProperties.maxFragmentDensityTexelSize.width;
-    mFoveationCapabilities.densityMap.texelSize.max.height          = densityMapProperties.maxFragmentDensityTexelSize.height;
+    vkGetPhysicalDeviceFeatures(mGpu, &mGpuFeatures);
 
     uint32_t count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(mGpu, &count, nullptr);
@@ -88,8 +62,8 @@ Result Gpu::CreateApiObjects(const grfx::internal::GpuCreateInfo* pCreateInfo)
         vkGetPhysicalDeviceQueueFamilyProperties(mGpu, &count, mQueueFamilies.data());
     }
 
-    mDeviceName     = mGpuProperties.properties.deviceName;
-    mDeviceVendorId = static_cast<grfx::VendorId>(mGpuProperties.properties.deviceID);
+    mDeviceName     = mGpuProperties.deviceName;
+    mDeviceVendorId = static_cast<grfx::VendorId>(mGpuProperties.deviceID);
 
     return ppx::SUCCESS;
 }
@@ -103,7 +77,7 @@ void Gpu::DestroyApiObjects()
 
 float Gpu::GetTimestampPeriod() const
 {
-    return mGpuProperties.properties.limits.timestampPeriod;
+    return mGpuProperties.limits.timestampPeriod;
 }
 
 uint32_t Gpu::GetQueueFamilyCount() const

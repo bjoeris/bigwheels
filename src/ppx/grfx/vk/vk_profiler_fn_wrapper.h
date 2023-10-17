@@ -16,10 +16,13 @@
 #define PPX_GRFX_VK_PROFILER_FN_WRAPPHER_H
 
 #include "ppx/grfx/vk//vk_config_platform.h"
+#include "ppx/log.h"
 
 namespace ppx {
 namespace grfx {
 namespace vk {
+
+inline PFN_vkCreateRenderPass2KHR func_vkCreateRenderPass2;
 
 void RegisterProfilerFunctions();
 
@@ -215,6 +218,19 @@ inline VkResult CreateRenderPass(
     VkRenderPass*                 pRenderPass)
 {
     return vkCreateRenderPass(device, pCreateInfo, pAllocator, pRenderPass);
+}
+
+inline VkResult CreateRenderPass(
+    VkDevice                       device,
+    const VkRenderPassCreateInfo2* pCreateInfo,
+    const VkAllocationCallbacks*   pAllocator,
+    VkRenderPass*                  pRenderPass)
+{
+    if (func_vkCreateRenderPass2 == nullptr) {
+        PPX_LOG_WARN("[zzong] no vkCreateRenderPass2");
+        return VK_ERROR_UNKNOWN;
+    }
+    return func_vkCreateRenderPass2(device, pCreateInfo, pAllocator, pRenderPass);
 }
 
 inline VkResult AllocateCommandBuffers(

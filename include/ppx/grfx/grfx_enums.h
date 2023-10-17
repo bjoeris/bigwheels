@@ -263,7 +263,7 @@ enum FoveationMode
 {
     FOVEATION_NONE        = 0,
     FOVEATION_DENSITY_MAP = 1,
-    FOVEATION_VRS         = 2, //TODO(zzong) Implement support for VRS based foveation.
+    FOVEATION_VRS         = 2,
 };
 
 enum FrontFace

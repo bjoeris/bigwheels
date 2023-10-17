@@ -186,6 +186,9 @@ void FillOutGraphicsPipelineCreateInfo(
         pDstCreateInfo->outputState.depthStencilFormat = pSrcCreateInfo->outputState.depthStencilFormat;
     }
 
+    // Foveation mode
+    pDstCreateInfo->foveationMode = pSrcCreateInfo->foveationMode;
+
     // Pipeline internface
     pDstCreateInfo->pPipelineInterface = pSrcCreateInfo->pPipelineInterface;
 }

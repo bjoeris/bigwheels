@@ -29,6 +29,7 @@
 #include <filesystem>
 #include <vector>
 
+const grfx::FoveationMode kFoveation = grfx::FOVEATION_VRS;
 #if defined(USE_DX12)
 const grfx::Api kApi = grfx::API_DX_12_0;
 #elif defined(USE_VK)

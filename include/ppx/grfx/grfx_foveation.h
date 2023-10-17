@@ -54,9 +54,23 @@ struct FoveationCapabilities
 
     struct
     {
-        bool supportPipelineVRS   = false;
-        bool supportPrimitiveVRS  = false;
-        bool supportAttachmentVRS = false;
+        bool  supportPipelineVRS   = false;
+        bool  supportPrimitiveVRS  = false;
+        bool  supportAttachmentVRS = false;
+        uint2 minTexelSize;
+        uint2 maxTexelSize;
+        struct
+        {
+            std::vector<std::vector<uint32_t>> supported_rates;
+            uint32_t                           GetTexelValueOfRate(uint2 rate)
+            {
+                // zzong. probably should calculate on the fly??
+                // zzong. todo choose a closest one
+                // Use 1x1 (texel value 0) when requested rate is not supported
+                return supported_rates[rate.x >> 1][rate.y >> 1];
+            };
+
+        } vk;
     } vrs;
 };
 
@@ -76,6 +90,7 @@ protected:
 
 private:
     Result CreateDefaultTextureForDensityMap(const grfx::FoveationPatternCreateInfo* pCreateInfo, grfx::Texture** ppFoveationTexture);
+    Result CreateDefaultTextureForVRS(const grfx::FoveationPatternCreateInfo* pCreateInfo, grfx::Texture** ppFoveationTexture);
 
 private:
     grfx::FoveationMode mFoveationMode;

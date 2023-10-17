@@ -139,6 +139,7 @@ void Ocean::Setup(uint32_t numFramesInFlight)
                 gpCreateInfo.vertexInputState.bindings[i] = *vertexDescription.GetBinding(i);
             }
 
+            gpCreateInfo.foveationMode = kFoveation;
             PPX_CHECKED_CALL(device->CreateGraphicsPipeline(&gpCreateInfo, &mBeamForwardPipeline));
 
             device->DestroyShaderModule(VS);
