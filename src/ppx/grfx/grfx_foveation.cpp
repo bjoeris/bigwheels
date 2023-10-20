@@ -239,10 +239,14 @@ Result FoveationPattern::CreateDefaultTextureForVRS(const grfx::FoveationPattern
 
         for (int x = 0; x < h; x++) {
             for (int y = 0; y < w; y++) {
-                if (y < (w / 2))
+                if(false) {
+                    if (y < (w / 2))
+                        vrs_values[x * w + y] = size4x4;
+                    else
+                        vrs_values[x * w + y] = size1x1;
+                } else {
                     vrs_values[x * w + y] = size4x4;
-                else
-                    vrs_values[x * w + y] = size1x1;
+                }
             }
         }
         int uploadSize = w * h * sizeof(uint8_t);

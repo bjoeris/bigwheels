@@ -33,7 +33,22 @@ VSOutput vsmain(float4 Position : POSITION, float3 Color : COLOR)
 	return result;
 }
 
+uint pcg_hash(uint input)
+{
+    uint state = input * 747796405u + 2891336453u;
+    uint word = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
+    return (word >> 22u) ^ word;
+}
+
 float4 psmain(VSOutput input) : SV_TARGET
 {
-	return float4(input.Color, 1);
+	uint x = uint(input.Position.x + 0.5);
+	uint y = uint(input.Position.y + 0.5);
+	uint rand = pcg_hash(y * 10000 + x);
+	float3 noise = float3(
+		float(rand & 0xFF) * (1.0 / 255.0),
+		float((rand<<8) & 0xFF) * (1.0 / 255.0),
+		float((rand<<16) & 0xFF) * (1.0 / 255.0));
+
+ 	return float4(input.Color * 0.3 + noise * 0.7, 1);
 }

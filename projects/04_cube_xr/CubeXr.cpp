@@ -26,11 +26,12 @@ const grfx::Api kApi = grfx::API_VK_1_1;
 void CubeXrApp::Config(ppx::ApplicationSettings& settings)
 {
     settings.appName                    = "04_cube";
-    settings.enableImGui                = true;
+    settings.enableImGui                = false;
     settings.grfx.api                   = kApi;
     settings.grfx.swapchain.depthFormat = grfx::FORMAT_D32_FLOAT;
     settings.grfx.enableDebug           = false;
     settings.grfx.pacedFrameRate        = 0;
+    settings.grfx.foveationMode         = grfx::FOVEATION_VRS;
     settings.xr.enable                  = true;
     settings.xr.enableDebugCapture      = false;
 }
@@ -136,7 +137,7 @@ void CubeXrApp::Setup()
     // Vertex buffer and geometry data
     {
         // clang-format off
-        std::vector<float> vertexData = {  
+        std::vector<float> vertexData = {
             // position          // vertex colors
             -1.0f,-1.0f,-1.0f,   1.0f, 0.0f, 0.0f,  // -Z side
              1.0f, 1.0f,-1.0f,   1.0f, 0.0f, 0.0f,
@@ -278,7 +279,7 @@ void CubeXrApp::Render()
             P = GetXrComponent().GetProjectionMatrixForCurrentViewAndSetFrustumPlanes(0.001f, 10000.0f);
             V = GetXrComponent().GetViewMatrixForCurrentView();
         }
-        float4x4 M   = glm::translate(float3(0, 0, -3)) * glm::rotate(t, float3(0, 0, 1)) * glm::rotate(t, float3(0, 1, 0)) * glm::rotate(t, float3(1, 0, 0));
+        float4x4 M   = glm::translate(float3(0, 0, -3)) * glm::scale(glm::mat4(1), glm::vec3(100, 100, 1)) * glm::rotate(t, float3(0, 0, 1)) * glm::rotate(t, float3(0, 1, 0)) * glm::rotate(t, float3(1, 0, 0));
         float4x4 mat = P * V * M;
 
         void* pData = nullptr;

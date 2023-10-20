@@ -9,6 +9,9 @@
   <uses-feature android:name="android.hardware.vr.high_performance" android:required="true" />
   <uses-feature android:name="android.software.vr.mode" android:required="true" />
 
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
   <!-- Needed for Oculus devices -->
     <uses-feature android:name="com.oculus.feature.PASSTHROUGH" android:required="false" />
     <meta-data android:name="com.oculus.intent.category.VR" android:value="vr_only"/>
