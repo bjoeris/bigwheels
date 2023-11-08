@@ -137,11 +137,11 @@ Result RenderPass::CreateRenderPass(const grfx::internal::RenderPassCreateInfo* 
         vrs_desc.format         = VK_FORMAT_R8_UINT;
         vrs_desc.samples        = VK_SAMPLE_COUNT_1_BIT;
         vrs_desc.loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
-        vrs_desc.initialLayout  = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        vrs_desc.initialLayout  = VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR;
         vrs_desc.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_LOAD;
         vrs_desc.storeOp        = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         vrs_desc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        vrs_desc.finalLayout    = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        vrs_desc.finalLayout    = VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR;
 
         attachmentDesc.push_back(vrs_desc);
 
@@ -381,11 +381,11 @@ VkResult CreateTransientRenderPass(
         vrs_desc.format         = VK_FORMAT_R8_UINT;
         vrs_desc.samples        = VK_SAMPLE_COUNT_1_BIT;
         vrs_desc.loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
-        vrs_desc.initialLayout  = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        vrs_desc.initialLayout  = VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR;
         vrs_desc.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_LOAD;
         vrs_desc.storeOp        = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         vrs_desc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        vrs_desc.finalLayout    = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        vrs_desc.finalLayout    = VK_IMAGE_LAYOUT_FRAGMENT_SHADING_RATE_ATTACHMENT_OPTIMAL_KHR;
 
         attachmentDescs.push_back(vrs_desc);
 

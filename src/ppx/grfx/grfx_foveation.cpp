@@ -186,8 +186,8 @@ Result FoveationPattern::CreateDefaultTextureForVRS(const grfx::FoveationPattern
     // Create foveation texture
     uint32_t texel_w = foveationCapabilites.vrs.minTexelSize.x;
     uint32_t texel_h = foveationCapabilites.vrs.minTexelSize.y;
-    uint32_t w       = pCreateInfo->fbWidth / texel_w;
-    uint32_t h       = pCreateInfo->fbHeight / texel_h;
+    uint32_t w       = (pCreateInfo->fbWidth + texel_w - 1) / texel_w;
+    uint32_t h       = (pCreateInfo->fbHeight + texel_h - 1) / texel_h;
     // uint32_t double_w = pCreateInfo->fbWidth * 2 / texel_w;
     // uint32_t double_h = pCreateInfo->fbHeight * 2 / texel_h;
     PPX_LOG_INFO("[zzong] 1:1 density map: " << w << "x" << h << ", with texel size of: " << texel_w << ", " << texel_h);
@@ -239,12 +239,13 @@ Result FoveationPattern::CreateDefaultTextureForVRS(const grfx::FoveationPattern
 
         for (int x = 0; x < h; x++) {
             for (int y = 0; y < w; y++) {
-                if(false) {
+                if (false) {
                     if (y < (w / 2))
                         vrs_values[x * w + y] = size4x4;
                     else
                         vrs_values[x * w + y] = size1x1;
-                } else {
+                }
+                else {
                     vrs_values[x * w + y] = size4x4;
                 }
             }
@@ -291,7 +292,7 @@ Result FoveationPattern::CreateDefaultTextureForVRS(const grfx::FoveationPattern
             /*arrayLayer=*/0,
             /*arrayLayerCount=*/1,
             /*stateBefore=*/RESOURCE_STATE_GENERAL,
-            /*stateAfter=*/RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
+            /*stateAfter=*/RESOURCE_STATE_FRAGMENT_SHADING_RATE_ATTACHMENT));
     }
     return ppx::SUCCESS;
 }
