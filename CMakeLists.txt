@@ -209,10 +209,10 @@ endif()
 # ------------------------------------------------------------------------------
 if (PPX_ANDROID)
     include_directories("${ANDROID_NDK}/sources/android/native_app_glue/")
-    add_library(android_native_app_glue
+    add_library(android_native_app_glue_impl
         OBJECT
         "${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c")
-    target_compile_options(android_native_app_glue PRIVATE -fPIC)
+    target_compile_options(android_native_app_glue_impl PRIVATE -fPIC)
 endif()
 
 # ------------------------------------------------------------------------------
